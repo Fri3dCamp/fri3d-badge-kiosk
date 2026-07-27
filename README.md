@@ -11,6 +11,7 @@ Currently Supported:
 - Flamingo
 - Communicator 2026
 - Communicator 2024
+- DJ Addon 2026
 
 ## Development
 
@@ -20,7 +21,7 @@ This is an electron app that uses Vite with React Typescript as a frontend.
 
 Download the latest version for your platform here: https://github.com/DrSkunk/fri3d-badge-kiosk/releases/latest
 
-Open the app and click the cogwheel in the top right corner, then click **Download flashers & firmware**. This downloads the flashing tools and the latest firmware for all boards automatically into the `flashers` and `firmware` directories next to the binary.
+Open the app and click the cogwheel in the top right corner, then click **Download flashers & firmware**. This downloads the flashing tools and the latest published firmware from [BadgeHub](https://badgehub.eu/) into the `flashers` and `firmware` directories next to the binary.
 
 ### Manual setup
 
@@ -45,11 +46,12 @@ Currently this is:
 - `flamingo.hex`
 - `communicator_2026.bin`
 - `communicator_2024.bin`
+- `dj_2026.bin`
 
-Note: `badge_2022.bin` must be a single image flashable at offset `0x0`. The automatic download builds it by merging the bootloader, partition table and application from the [badge-2020 firmware zip](https://github.com/Fri3dCamp/badge-2020/blob/master/firmware/micropython-latest.zip) with `esptool merge_bin`.
+Firmware downloads use BadgeHub project and file references from the boards manifest. Downloads are checked against BadgeHub's size and SHA-256 metadata before replacing local firmware.
 
 ## Adding a new board
 
-1. Add an entry to [public/boards/index.json](./public/boards/index.json) with a unique `key`, a `chipType` (`ESP`, `AVR` or `WCHISP`), the `firmware` filename and a `download` source (`type: "url"` for a direct file, `type: "esp-zip"` for an ESP-IDF zip with a `flash_args` file that gets merged into a single image).
+1. Add an entry to [public/boards/index.json](./public/boards/index.json) with a unique `key`, a `chipType` (`ESP`, `AVR` or `WCHISP`), the local `firmware` filename and a BadgeHub `download` source containing its project slug and file name.
 2. Create `public/boards/<key>/` with `icon.webp`, `instructions.en.md` and `instructions.nl.md`.
 3. If the board uses a new chip, add a flasher to the `flashers` map in [electron/flasher.cjs](./electron/flasher.cjs) and a download source in [electron/downloader.cjs](./electron/downloader.cjs).

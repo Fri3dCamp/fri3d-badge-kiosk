@@ -2,6 +2,7 @@ const fs = require("fs");
 const os = require("os");
 const path = require("path");
 const { spawn } = require("child_process");
+const { createHash } = require("crypto");
 const { platform, arch } = require("process");
 const EventEmitter = require("node:events");
 const extractZip = require("extract-zip");
@@ -52,8 +53,8 @@ const FLASHER_SOURCES = {
   },
 };
 
+const BADGEHUB_API_URL = "https://badgehub.eu/api/v3";
 const FETCH_HEADERS = {
-  // GitHub rejects requests without a user agent
   "User-Agent": "fri3d-badge-kiosk",
 };
 
@@ -70,16 +71,63 @@ async function fetchLatestRelease(repo) {
   return response.json();
 }
 
-async function downloadFile(url, destination) {
+async function downloadFile(url, destination, expectedFile = null) {
   const response = await fetch(url, { headers: FETCH_HEADERS });
   if (!response.ok) {
     throw new Error(`Download failed (HTTP ${response.status}): ${url}`);
   }
   const buffer = Buffer.from(await response.arrayBuffer());
+  if (expectedFile) {
+    if (buffer.length !== expectedFile.size_of_content) {
+      throw new Error(
+        `Firmware size mismatch: expected ${expectedFile.size_of_content} bytes, received ${buffer.length}`
+      );
+    }
+    const sha256 = createHash("sha256").update(buffer).digest("hex");
+    if (sha256.toLowerCase() !== expectedFile.sha256.toLowerCase()) {
+      throw new Error(
+        `Firmware SHA-256 mismatch: expected ${expectedFile.sha256}, received ${sha256}`
+      );
+    }
+  }
   await fs.promises.writeFile(destination, buffer);
-  // The final URL after redirects contains the release tag for
-  // "releases/latest/download/..." style links.
   return response.url || url;
+}
+
+async function fetchBadgeHubJson(url) {
+  const response = await fetch(url, { headers: FETCH_HEADERS });
+  if (!response.ok) {
+    throw new Error(`BadgeHub request failed (HTTP ${response.status}): ${url}`);
+  }
+  return response.json();
+}
+
+async function resolveBadgeHubFirmware({ project, file }) {
+  const projectUrl = `${BADGEHUB_API_URL}/projects/${encodeURIComponent(project)}`;
+  const versions = await fetchBadgeHubJson(`${projectUrl}/versions`);
+  if (!Array.isArray(versions) || versions.length === 0) {
+    throw new Error(`No published BadgeHub versions found for ${project}`);
+  }
+
+  const latest = versions.reduce((current, candidate) =>
+    Date.parse(candidate.latestPublishDate) > Date.parse(current.latestPublishDate)
+      ? candidate
+      : current
+  );
+  const revision = await fetchBadgeHubJson(
+    `${projectUrl}/rev${latest.latestRevision}`
+  );
+  const firmwareFile = revision.version?.files?.find(
+    (candidate) => candidate.full_path === file
+  );
+  if (!firmwareFile) {
+    throw new Error(`Could not find ${file} in BadgeHub project ${project}`);
+  }
+
+  return {
+    file: firmwareFile,
+    version: latest.version?.trim() || `rev${latest.latestRevision}`,
+  };
 }
 
 // Version bookkeeping: every download records what was fetched in a
@@ -207,92 +255,6 @@ async function downloadFlashers() {
   }
 }
 
-function resolveEsptool() {
-  const candidates =
-    platform === "win32" ? ["esptool.exe"] : ["esptool", "esptool.py"];
-  for (const candidate of candidates) {
-    const fullPath = path.resolve("flashers", candidate);
-    if (fs.existsSync(fullPath)) {
-      return fullPath;
-    }
-  }
-  // Fall back to whatever is in PATH
-  return "esptool";
-}
-
-// Download a zip with separate bootloader/partition-table/application
-// binaries plus a flash_args file, and merge them into a single image
-// that can be flashed at offset 0x0.
-async function downloadAndMergeEspZip(board, destination) {
-  return withTempDir(async (tempDir) => {
-    const archivePath = path.join(tempDir, "firmware.zip");
-    await downloadFile(board.download.url, archivePath);
-
-    const extractDir = path.join(tempDir, "extracted");
-    await extractArchive(archivePath, extractDir);
-
-    const flashArgsPath = findFile(extractDir, ["flash_args"]);
-    if (!flashArgsPath) {
-      throw new Error(`No flash_args file found in firmware zip of ${board.name}`);
-    }
-    const baseDir = path.dirname(flashArgsPath);
-    const flashArgs = await fs.promises.readFile(flashArgsPath, "utf-8");
-
-    const sections = [];
-    let flashMode = "dio";
-    let flashFreq = "40m";
-    let flashSize = "detect";
-    for (const line of flashArgs.split("\n")) {
-      const sectionMatch = line.trim().match(/^(0x[0-9a-fA-F]+)\s+(.+)$/);
-      if (sectionMatch) {
-        sections.push([sectionMatch[1], path.join(baseDir, sectionMatch[2])]);
-        continue;
-      }
-      flashMode = line.match(/--flash_mode\s+(\S+)/)?.[1] ?? flashMode;
-      flashFreq = line.match(/--flash_freq\s+(\S+)/)?.[1] ?? flashFreq;
-      flashSize = line.match(/--flash_size\s+(\S+)/)?.[1] ?? flashSize;
-    }
-    if (sections.length === 0) {
-      throw new Error(`No flash sections found in flash_args of ${board.name}`);
-    }
-
-    progress(`Merging ${sections.length} parts into ${board.firmware}...\n`);
-    const mergeArgs = [
-      "--chip",
-      board.download.chip || "esp32",
-      "merge_bin",
-      "-o",
-      destination,
-      "--flash_mode",
-      flashMode,
-      "--flash_freq",
-      flashFreq,
-      "--flash_size",
-      flashSize,
-      ...sections.flat(),
-    ];
-    await new Promise((resolve, reject) => {
-      const child = spawn(resolveEsptool(), mergeArgs);
-      child.stdout.on("data", (data) => progress(data.toString()));
-      child.stderr.on("data", (data) => progress(data.toString()));
-      child.on("error", reject);
-      child.on("close", (code) => {
-        if (code === 0) {
-          resolve();
-        } else {
-          reject(new Error(`esptool merge_bin failed (exit ${code})`));
-        }
-      });
-    });
-  });
-}
-
-// Extract a release tag from a resolved GitHub release download URL,
-// e.g. .../releases/download/v1.2.3/firmware.bin -> v1.2.3
-function versionFromUrl(url) {
-  return url?.match(/\/releases\/download\/([^/]+)\//)?.[1] ?? null;
-}
-
 async function downloadBoardFirmware(board) {
   const { name, key, firmware, download } = board;
   if (!download) {
@@ -302,19 +264,17 @@ async function downloadBoardFirmware(board) {
   await fs.promises.mkdir(path.resolve("firmware"), { recursive: true });
   progress(`Downloading firmware for ${name}...\n`);
   const destination = path.resolve("firmware", firmware);
-  let version = null;
-  if (download.type === "url") {
-    const finalUrl = await downloadFile(download.url, destination);
-    version = versionFromUrl(finalUrl);
-  } else if (download.type === "esp-zip") {
-    await downloadAndMergeEspZip(board, destination);
-  } else {
+  if (download.type !== "badgehub") {
     throw new Error(`Unknown download type "${download.type}" for ${name}`);
   }
+  const release = await resolveBadgeHubFirmware(download);
+  await downloadFile(release.file.url, destination, release.file);
   await recordVersion(path.resolve("firmware"), key, {
     fileName: firmware,
-    version,
-    url: download.url,
+    version: release.version,
+    project: download.project,
+    asset: download.file,
+    url: release.file.url,
     downloadedAt: new Date().toISOString(),
   });
   progress(`Saved ${firmware}\n`);

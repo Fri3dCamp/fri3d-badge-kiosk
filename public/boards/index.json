@@ -11,9 +11,9 @@
     },
     "firmware": "badge_2022.bin",
     "download": {
-      "type": "esp-zip",
-      "url": "https://raw.githubusercontent.com/Fri3dCamp/badge-2020/master/firmware/micropython-latest.zip",
-      "chip": "esp32"
+      "type": "badgehub",
+      "project": "fri3d_camp_legacy_firmware",
+      "file": "badge_2022.bin"
     }
   },
   {
@@ -28,8 +28,9 @@
     },
     "firmware": "blaster.hex",
     "download": {
-      "type": "url",
-      "url": "https://raw.githubusercontent.com/area3001/Timeblaster/refs/heads/main/Binaries/Firmware_20220730_with_bootloader.hex"
+      "type": "badgehub",
+      "project": "fri3d_camp_legacy_firmware",
+      "file": "blaster_2022.hex"
     }
   },
   {
@@ -44,8 +45,9 @@
     },
     "firmware": "badge_2024.bin",
     "download": {
-      "type": "url",
-      "url": "https://github.com/Fri3dCamp/badge_firmware_MicroPythonOS/releases/latest/download/full_2026_firmware_for_2024_badge.bin"
+      "type": "badgehub",
+      "project": "com.micropythonos.esp32s3",
+      "file": "firmware.bin"
     }
   },
   {
@@ -60,8 +62,9 @@
     },
     "firmware": "badge_2026.bin",
     "download": {
-      "type": "url",
-      "url": "https://github.com/Fri3dCamp/badge_firmware_MicroPythonOS/releases/latest/download/full_2026_firmware_for_2026_badge.bin"
+      "type": "badgehub",
+      "project": "com.micropythonos.esp32s3",
+      "file": "firmware.bin"
     }
   },
   {
@@ -76,8 +79,9 @@
     },
     "firmware": "flamingo.hex",
     "download": {
-      "type": "url",
-      "url": "https://github.com/area3001/Timeblaster/releases/download/v20220511-alpha/Fri3dcamp.Blaster.20220511.with_bootloader.hex"
+      "type": "badgehub",
+      "project": "blaster_2024",
+      "file": "flamingo.hex"
     }
   },
   {
@@ -92,8 +96,9 @@
     },
     "firmware": "communicator_2024.bin",
     "download": {
-      "type": "url",
-      "url": "https://github.com/Fri3dCamp/communicator_2024/releases/latest/download/firmware.bin"
+      "type": "badgehub",
+      "project": "communicator_2024",
+      "file": "firmware.bin"
     }
   },
   {
@@ -108,8 +113,9 @@
     },
     "firmware": "communicator_2026.bin",
     "download": {
-      "type": "url",
-      "url": "https://github.com/Fri3dCamp/communicator_2026/releases/latest/download/firmware.bin"
+      "type": "badgehub",
+      "project": "communicator_2026",
+      "file": "firmware.bin"
     }
   },
   {
@@ -124,8 +130,9 @@
     },
     "firmware": "dj_2026.bin",
     "download": {
-      "type": "url",
-      "url": "https://github.com/Fri3dCamp/dj_2026/releases/latest/download/firmware.bin"
+      "type": "badgehub",
+      "project": "dj_2026",
+      "file": "firmware.bin"
     }
   }
 ]
