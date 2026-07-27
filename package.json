@@ -1,6 +1,6 @@
 {
   "name": "fri3d-badge-kiosk",
-  "version": "3.0.3",
+  "version": "3.1.0",
   "main": "electron/main.cjs",
   "type": "module",
   "author": "Sebastiaan Jansen",
