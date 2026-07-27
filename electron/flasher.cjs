@@ -82,6 +82,11 @@ function selectBoard(board) {
 const stdoutEvents = new EventEmitter();
 const stderrEvents = new EventEmitter();
 
+function getAssetsDirectory(kind) {
+  const dataDirectory = app.isPackaged ? app.getPath("userData") : process.cwd();
+  return path.join(dataDirectory, kind);
+}
+
 async function loadJsonFile(filePath) {
   const data = await fs.promises.readFile(filePath);
   return JSON.parse(data);
@@ -89,14 +94,16 @@ async function loadJsonFile(filePath) {
 
 async function loadBoardsManifest() {
   return app.isPackaged
-    ? loadJsonFile("./resources/build-gui/boards/index.json")
-    : loadJsonFile("./public/boards/index.json");
+    ? loadJsonFile(path.join(process.resourcesPath, "build-gui/boards/index.json"))
+    : loadJsonFile(path.join(process.cwd(), "public/boards/index.json"));
 }
 
 async function initialise() {
+  const firmwareDir = getAssetsDirectory("firmware");
+  const flashersDir = getAssetsDirectory("flashers");
   try {
-    fs.mkdirSync(path.resolve("firmware"), { recursive: true });
-    fs.mkdirSync(path.resolve("flashers"), { recursive: true });
+    fs.mkdirSync(firmwareDir, { recursive: true });
+    fs.mkdirSync(flashersDir, { recursive: true });
   } catch (error) {
     console.error("Error creating directories", error);
   }
@@ -113,7 +120,7 @@ async function initialise() {
 
     // First check if the executable is available in the flashers directory
     const bundled = candidates
-      .map((candidate) => path.resolve("flashers", candidate))
+      .map((candidate) => path.join(flashersDir, candidate))
       .find((candidatePath) => fs.existsSync(candidatePath));
     if (bundled) {
       flashers[name].command = bundled;
@@ -148,7 +155,6 @@ async function initialise() {
   }
 
   // check if all firmware files are available
-  const firmwareDir = path.resolve("firmware");
   const boardsManifest = await loadBoardsManifest();
 
   let missingFirmware = [];
@@ -182,7 +188,7 @@ async function flash() {
       `The ${flashers[chipType].executable} flasher is not available. Download it via the settings menu or add it to the "flashers" directory.`
     );
   }
-  const firmwarePath = path.resolve("firmware", firmware);
+  const firmwarePath = path.join(getAssetsDirectory("firmware"), firmware);
   if (!fs.existsSync(firmwarePath)) {
     throw new Error(`Firmware file not found: ${firmwarePath}`);
   }
@@ -207,6 +213,7 @@ module.exports = {
   flash,
   selectBoard,
   loadBoardsManifest,
+  getAssetsDirectory,
   stdout: stdoutEvents,
   stderr: stderrEvents,
 };

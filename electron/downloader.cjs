@@ -6,7 +6,10 @@ const { createHash } = require("crypto");
 const { platform, arch } = require("process");
 const EventEmitter = require("node:events");
 const extractZip = require("extract-zip");
-const { loadBoardsManifest } = require("./flasher.cjs");
+const {
+  loadBoardsManifest,
+  getAssetsDirectory,
+} = require("./flasher.cjs");
 
 const events = new EventEmitter();
 
@@ -201,7 +204,8 @@ async function downloadFlasher(name) {
   if (!FLASHER_SOURCES[name]) {
     throw new Error(`Unknown flasher "${name}"`);
   }
-  await fs.promises.mkdir(path.resolve("flashers"), { recursive: true });
+  const flashersDir = getAssetsDirectory("flashers");
+  await fs.promises.mkdir(flashersDir, { recursive: true });
   const { repo, assetPatterns } = FLASHER_SOURCES[name];
   // Fall back to the x64 build for platforms without a native build
   const pattern = assetPatterns[`${platform}-${arch}`] || assetPatterns[`${platform}-x64`];
@@ -233,12 +237,12 @@ async function downloadFlasher(name) {
       throw new Error(`Could not find ${binaryName} inside ${asset.name}`);
     }
 
-    const target = path.resolve("flashers", binaryName);
+    const target = path.join(flashersDir, binaryName);
     await fs.promises.copyFile(binaryPath, target);
     if (platform !== "win32") {
       await fs.promises.chmod(target, 0o755);
     }
-    await recordVersion(path.resolve("flashers"), name, {
+    await recordVersion(flashersDir, name, {
       fileName: binaryName,
       version: release.tag_name,
       asset: asset.name,
@@ -261,15 +265,16 @@ async function downloadBoardFirmware(board) {
     progress(`No download source configured for ${name}, skipping\n`);
     return;
   }
-  await fs.promises.mkdir(path.resolve("firmware"), { recursive: true });
+  const firmwareDir = getAssetsDirectory("firmware");
+  await fs.promises.mkdir(firmwareDir, { recursive: true });
   progress(`Downloading firmware for ${name}...\n`);
-  const destination = path.resolve("firmware", firmware);
+  const destination = path.join(firmwareDir, firmware);
   if (download.type !== "badgehub") {
     throw new Error(`Unknown download type "${download.type}" for ${name}`);
   }
   const release = await resolveBadgeHubFirmware(download);
   await downloadFile(release.file.url, destination, release.file);
-  await recordVersion(path.resolve("firmware"), key, {
+  await recordVersion(firmwareDir, key, {
     fileName: firmware,
     version: release.version,
     project: download.project,
@@ -308,13 +313,15 @@ async function statFile(filePath) {
 // Overview of installed flashers and firmware files with the version
 // information recorded at download time, for the settings menu.
 async function getAssetsStatus() {
-  const flasherVersions = await readVersions(path.resolve("flashers"));
-  const firmwareVersions = await readVersions(path.resolve("firmware"));
+  const flashersDir = getAssetsDirectory("flashers");
+  const firmwareDir = getAssetsDirectory("firmware");
+  const flasherVersions = await readVersions(flashersDir);
+  const firmwareVersions = await readVersions(firmwareDir);
 
   const flashers = await Promise.all(
     Object.keys(FLASHER_SOURCES).map(async (name) => {
       const fileName = platform === "win32" ? `${name}.exe` : name;
-      const stats = await statFile(path.resolve("flashers", fileName));
+      const stats = await statFile(path.join(flashersDir, fileName));
       const record = flasherVersions[name];
       return {
         key: name,
@@ -332,7 +339,7 @@ async function getAssetsStatus() {
   const boards = await loadBoardsManifest();
   const firmware = await Promise.all(
     boards.map(async (board) => {
-      const stats = await statFile(path.resolve("firmware", board.firmware));
+      const stats = await statFile(path.join(firmwareDir, board.firmware));
       const record = firmwareVersions[board.key];
       return {
         key: board.key,

@@ -43,11 +43,17 @@ xattr -dr com.apple.quarantine "/Applications/Fri3d Badge Fixer.app"
 open "/Applications/Fri3d Badge Fixer.app"
 ```
 
-Open the app and click the cogwheel in the top right corner, then click **Download flashers & firmware**. This downloads the flashing tools and the latest published firmware from [BadgeHub](https://badgehub.eu/) into the `flashers` and `firmware` directories next to the binary.
+Open the app and click the cogwheel in the top right corner, then click **Download flashers & firmware**. This downloads the flashing tools and the latest published firmware from [BadgeHub](https://badgehub.eu/) into the app's writable user data directory.
 
 ### Manual setup
 
-If you prefer to set things up manually (for example on a machine without internet access), create the `flashers` and `firmware` directories next to your downloaded binary.
+If you prefer to set things up manually (for example on a machine without internet access), create `flashers` and `firmware` directories in the app's user data directory:
+
+- macOS: `~/Library/Application Support/Fri3d Badge Fixer/`
+- Windows: `%APPDATA%\Fri3d Badge Fixer\`
+- Linux: `~/.config/Fri3d Badge Fixer/`
+
+Development builds continue to use `flashers` and `firmware` in the project root.
 
 Add your platform's respective versions of the flashing tools to the `flashers` directory. Or make them available in your path.
 
