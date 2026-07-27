@@ -21,6 +21,28 @@ This is an electron app that uses Vite with React Typescript as a frontend.
 
 Download the latest version for your platform here: https://github.com/DrSkunk/fri3d-badge-kiosk/releases/latest
 
+### macOS
+
+Download the DMG matching your Mac:
+
+- `arm64` for Apple Silicon (M1, M2, M3, M4, etc.)
+- `x64` for Intel Macs
+
+The macOS app is unsigned, so Gatekeeper may block it on first launch.
+
+To open it with Finder:
+
+1. Copy **Fri3d Badge Fixer** to the Applications folder.
+2. Control-click or right-click the app and select **Open**.
+3. Select **Open** again in the warning dialog.
+
+Alternatively, remove the quarantine attribute in Terminal and launch the app:
+
+```sh
+xattr -dr com.apple.quarantine "/Applications/Fri3d Badge Fixer.app"
+open "/Applications/Fri3d Badge Fixer.app"
+```
+
 Open the app and click the cogwheel in the top right corner, then click **Download flashers & firmware**. This downloads the flashing tools and the latest published firmware from [BadgeHub](https://badgehub.eu/) into the `flashers` and `firmware` directories next to the binary.
 
 ### Manual setup

@@ -27,6 +27,9 @@
       "build-resources/**/*"
     ],
     "artifactName": "fri3d-badge-fixer-${os}-${arch}-${version}.${ext}",
+    "mac": {
+      "identity": null
+    },
     "win": {
       "target": [
         "zip"
@@ -48,7 +51,7 @@
     "@vitejs/plugin-react-swc": "^3.7.0",
     "concurrently": "^8.2.2",
     "electron": "^31.3.1",
-    "electron-builder": "^24.13.3",
+    "electron-builder": "^26.15.3",
     "tailwindcss": "^4.3.2",
     "vite": "^5.3.5"
   },
