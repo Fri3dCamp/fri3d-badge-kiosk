@@ -331,6 +331,8 @@ async function getAssetsStatus() {
         size: stats?.size ?? null,
         modifiedAt: stats?.modifiedAt ?? null,
         version: record?.version ?? null,
+        availableVersion: null,
+        updateAvailable: false,
         downloadedAt: record?.downloadedAt ?? null,
       };
     })
@@ -349,8 +351,66 @@ async function getAssetsStatus() {
         size: stats?.size ?? null,
         modifiedAt: stats?.modifiedAt ?? null,
         version: record?.version ?? null,
+        availableVersion: null,
+        updateAvailable: false,
         downloadedAt: record?.downloadedAt ?? null,
       };
+    })
+  );
+
+  return { flashers, firmware };
+}
+
+async function checkForUpdates() {
+  const assets = await getAssetsStatus();
+  const firmwareVersions = await readVersions(getAssetsDirectory("firmware"));
+  const boards = await loadBoardsManifest();
+
+  const flashers = await Promise.all(
+    assets.flashers.map(async (asset) => {
+      try {
+        const release = await fetchLatestRelease(FLASHER_SOURCES[asset.key].repo);
+        const availableVersion = release.tag_name ?? null;
+        return {
+          ...asset,
+          availableVersion,
+          updateAvailable:
+            asset.installed &&
+            asset.version !== null &&
+            availableVersion !== null &&
+            asset.version !== availableVersion,
+        };
+      } catch (error) {
+        console.warn(`Could not check updates for ${asset.name}:`, error.message);
+        return asset;
+      }
+    })
+  );
+
+  const firmware = await Promise.all(
+    assets.firmware.map(async (asset) => {
+      const board = boards.find((candidate) => candidate.key === asset.key);
+      if (!board?.download || board.download.type !== "badgehub") return asset;
+
+      try {
+        const release = await resolveBadgeHubFirmware(board.download);
+        const record = firmwareVersions[asset.key];
+        const sourceChanged =
+          record?.version !== undefined &&
+          (record.project !== board.download.project ||
+            record.asset !== board.download.file);
+        return {
+          ...asset,
+          availableVersion: release.version,
+          updateAvailable:
+            asset.installed &&
+            asset.version !== null &&
+            (asset.version !== release.version || sourceChanged),
+        };
+      } catch (error) {
+        console.warn(`Could not check updates for ${asset.name}:`, error.message);
+        return asset;
+      }
     })
   );
 
@@ -370,5 +430,6 @@ module.exports = {
   downloadFlasher,
   downloadBoardFirmwareByKey,
   getAssetsStatus,
+  checkForUpdates,
   events,
 };

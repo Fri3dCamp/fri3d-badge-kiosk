@@ -6,6 +6,8 @@ export interface AssetStatus {
   size: number | null;
   modifiedAt: string | null;
   version: string | null;
+  availableVersion: string | null;
+  updateAvailable: boolean;
   downloadedAt: string | null;
 }
 

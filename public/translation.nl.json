@@ -20,6 +20,13 @@
   "settingsFlashersTitle": "Flash-programma's",
   "settingsFirmwareTitle": "Firmware",
   "downloadItemButton": "Download",
+  "updateItemButton": "Bijwerken",
   "statusMissing": "Niet gedownload",
-  "versionUnknown": "versie onbekend"
+  "versionUnknown": "versie onbekend",
+  "checkingUpdates": "Controleren op updates...",
+  "updateAvailable": "Update beschikbaar",
+  "updatesAvailableTitle": "Updates beschikbaar",
+  "updatesAvailableExplanation": "Er zijn nieuwe versies beschikbaar voor geïnstalleerde firmware of flash-programma's.",
+  "openSettingsButton": "Instellingen openen",
+  "notNowButton": "Niet nu"
 }

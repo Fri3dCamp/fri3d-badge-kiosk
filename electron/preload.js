@@ -7,6 +7,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
   downloadAssets: () => ipcRenderer.invoke("downloadAssets"),
   downloadAsset: (kind, key) => ipcRenderer.invoke("downloadAsset", kind, key),
   getAssetsStatus: () => ipcRenderer.invoke("getAssetsStatus"),
+  checkForUpdates: () => ipcRenderer.invoke("checkForUpdates"),
 
   // from electron to frontend
   handleFlashComplete: (callback) => {

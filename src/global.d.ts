@@ -9,6 +9,7 @@ declare global {
       downloadAssets: () => void;
       downloadAsset: (kind: "flasher" | "firmware", key: string) => void;
       getAssetsStatus: () => Promise<AssetsStatus>;
+      checkForUpdates: () => Promise<AssetsStatus>;
       handleFlashComplete: (cb: () => void) => () => void;
       handleFlashError: (cb: () => void) => () => void;
       handleStdout: (cb: (event: any, data: string) => void) => () => void;

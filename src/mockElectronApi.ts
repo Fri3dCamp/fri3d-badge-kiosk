@@ -65,6 +65,8 @@ async function getAssetsStatus(): Promise<AssetsStatus> {
         size: 5_400_000,
         modifiedAt: "2026-07-01T10:00:00.000Z",
         version: "v5.0.1",
+        availableVersion: "v5.0.1",
+        updateAvailable: false,
         downloadedAt: "2026-07-01T10:00:00.000Z",
       },
       {
@@ -75,6 +77,8 @@ async function getAssetsStatus(): Promise<AssetsStatus> {
         size: 1_200_000,
         modifiedAt: "2026-07-01T10:00:00.000Z",
         version: "v8.1",
+        availableVersion: "v8.2",
+        updateAvailable: true,
         downloadedAt: "2026-07-01T10:00:00.000Z",
       },
       {
@@ -85,6 +89,8 @@ async function getAssetsStatus(): Promise<AssetsStatus> {
         size: null,
         modifiedAt: null,
         version: null,
+        availableVersion: "v0.4.0",
+        updateAvailable: false,
         downloadedAt: null,
       },
     ],
@@ -96,9 +102,15 @@ async function getAssetsStatus(): Promise<AssetsStatus> {
       size: index !== 1 ? 2_000_000 + index * 500_000 : null,
       modifiedAt: index !== 1 ? "2026-07-01T10:00:00.000Z" : null,
       version: index % 2 === 0 ? "v0.3.1" : null,
+      availableVersion: "v0.4.0",
+      updateAvailable: index === 0,
       downloadedAt: index !== 1 ? "2026-07-01T10:00:00.000Z" : null,
     })),
   };
+}
+
+function checkForUpdates(): Promise<AssetsStatus> {
+  return getAssetsStatus();
 }
 
 function downloadAsset(kind: "flasher" | "firmware", key: string) {
@@ -198,6 +210,7 @@ export const electronAPI = {
   downloadAssets,
   downloadAsset,
   getAssetsStatus,
+  checkForUpdates,
   handleFlashComplete,
   handleFlashError,
   handleStdout,

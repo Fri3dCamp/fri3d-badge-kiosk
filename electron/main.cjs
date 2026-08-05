@@ -167,6 +167,10 @@ async function createWindow() {
     return downloader.getAssetsStatus();
   });
 
+  ipcMain.handle("checkForUpdates", async () => {
+    return downloader.checkForUpdates();
+  });
+
   downloader.events.on("progress", (data) => {
     console.log("download", data);
     sendMessage("downloadProgress", data);

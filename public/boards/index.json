@@ -46,8 +46,8 @@
     "firmware": "badge_2024.bin",
     "download": {
       "type": "badgehub",
-      "project": "com.micropythonos.esp32s3",
-      "file": "firmware.bin"
+      "project": "be.fri3d.badge_firmware_micropythonos",
+      "file": "full_2026_firmware_for_2024_badge.bin"
     }
   },
   {
@@ -63,8 +63,8 @@
     "firmware": "badge_2026.bin",
     "download": {
       "type": "badgehub",
-      "project": "com.micropythonos.esp32s3",
-      "file": "firmware.bin"
+      "project": "be.fri3d.badge_firmware_micropythonos",
+      "file": "full_2026_firmware_for_2026_badge.bin"
     }
   },
   {

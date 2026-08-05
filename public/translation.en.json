@@ -20,6 +20,13 @@
   "settingsFlashersTitle": "Flash tools",
   "settingsFirmwareTitle": "Firmware",
   "downloadItemButton": "Download",
+  "updateItemButton": "Update",
   "statusMissing": "Not downloaded",
-  "versionUnknown": "unknown version"
+  "versionUnknown": "unknown version",
+  "checkingUpdates": "Checking for updates...",
+  "updateAvailable": "Update available",
+  "updatesAvailableTitle": "Updates available",
+  "updatesAvailableExplanation": "New versions are available for your installed firmware or flash tools.",
+  "openSettingsButton": "Open settings",
+  "notNowButton": "Not now"
 }
