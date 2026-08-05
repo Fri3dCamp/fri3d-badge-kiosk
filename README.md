@@ -17,6 +17,16 @@ Currently Supported:
 
 This is an electron app that uses Vite with React Typescript as a frontend.
 
+## Releases
+
+Publishing a non-prerelease GitHub release mirrors all attached release assets to
+the [`fri3d_badge_kiosk` project on BadgeHub](https://badgehub.eu/page/project/fri3d_badge_kiosk/),
+updates its version metadata and publishes a new BadgeHub revision. Add the
+project's API token as a repository Actions secret named `BADGEHUB_API_TOKEN`.
+A project API token can be created in BadgeHub's project settings. See the
+[BadgeHub API documentation](https://badgehub.eu/api-docs/) for the authenticated
+draft upload and publish endpoints.
+
 ## To use
 
 Download the latest version for your platform here: https://github.com/DrSkunk/fri3d-badge-kiosk/releases/latest

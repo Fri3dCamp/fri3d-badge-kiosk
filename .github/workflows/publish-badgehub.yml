@@ -1,0 +1,50 @@
+name: Publish release to BadgeHub
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: badgehub-${{ github.event.release.tag_name }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: github.event.release.prerelease == false
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+        with:
+          # Use the current automation from the default branch. This also lets
+          # the workflow publish a release for a tag created just before the
+          # BadgeHub workflow itself was added.
+          ref: ${{ github.event.repository.default_branch }}
+
+      - name: Install Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22.x
+
+      - name: Download GitHub release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/release-assets"
+          gh release download "$RELEASE_TAG" \
+            --repo "$GITHUB_REPOSITORY" \
+            --dir "$RUNNER_TEMP/release-assets"
+          test -n "$(find "$RUNNER_TEMP/release-assets" -maxdepth 1 -type f -print -quit)"
+
+      - name: Publish release on BadgeHub
+        env:
+          BADGEHUB_API_TOKEN: ${{ secrets.BADGEHUB_API_TOKEN }}
+          BADGEHUB_PROJECT: fri3d_badge_kiosk
+          RELEASE_ASSETS_DIR: ${{ runner.temp }}/release-assets
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: node .github/scripts/publish-badgehub.mjs
