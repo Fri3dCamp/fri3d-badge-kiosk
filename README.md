@@ -27,6 +27,11 @@ A project API token can be created in BadgeHub's project settings. See the
 [BadgeHub API documentation](https://badgehub.eu/api-docs/) for the authenticated
 draft upload and publish endpoints.
 
+If a tag push does not start the release job, run the **Build/release** workflow
+manually and enter the existing tag (for example `v3.4.1`). The workflow verifies
+that the tag matches `package.json` and that no GitHub release exists before it
+builds and publishes the release.
+
 ## To use
 
 Download the latest version for your platform here: https://github.com/DrSkunk/fri3d-badge-kiosk/releases/latest
