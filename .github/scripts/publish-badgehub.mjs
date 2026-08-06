@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import { readdir, readFile, stat } from "node:fs/promises";
 import path from "node:path";
 
-const API_URL = "https://badgehub.eu/api/v3";
+const API_URL = "https://direct.badgehub.eu/api/v3";
 const apiToken = process.env.BADGEHUB_API_TOKEN;
 const project = process.env.BADGEHUB_PROJECT;
 const assetsDirectory = process.env.RELEASE_ASSETS_DIR;
