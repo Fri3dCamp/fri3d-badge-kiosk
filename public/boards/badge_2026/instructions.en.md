@@ -1,7 +1,9 @@
 # Badge 2026
 
-- Turn over the badge.
-- Hold down the **S button** while connecting the badge to the USB-C cable connected to the computer.
-- Keep the **S button** pressed until the badge is connected, then release it.
-- Make sure the badge is turned **on**.
-- You're ready to flash! Click the **Start flashing** button below.
+1. Plug in the cable.
+2. Turn the badge **off** using the slide switch.
+3. **Hold** the **S button** while turning the badge back **on**.
+  - It is normal for the screen to remain black.
+4. Release the **S button**.
+5. You are ready to flash! Click the **Start flashing** button below.
+  - Wait until flashing has finished on the screen; then you can unplug the badge.
