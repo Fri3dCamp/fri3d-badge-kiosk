@@ -7,6 +7,7 @@
   "flashingFailedButton": "Het flashen lijkt gefaald. Wil je opnieuw proberen? Kijk zeker goed de instructies na!",
   "flashingTryAgainButton": "Opnieuw proberen",
   "flashingBackButton": "Instructies terug tonen",
+  "wchDeviceNotFoundHint": "We konden de addon niet vinden. Koppel die los van de hoofdbadge, sluit de USB-kabel rechtstreeks op de addon aan en probeer opnieuw.",
   "chooseOtherBoard": "Kies een ander bord",
   "flash": "Start met flashen",
   "changeToLanguage": "Change to English",
