@@ -8,10 +8,14 @@ const EventEmitter = require("node:events");
 
 async function spawnEmitter(command, options, stdout, stderr) {
   return new Promise((resolve, reject) => {
-    const completeCommand = `${command} ${options.join(" ")}`;
+    const completeCommand = [command, ...options]
+      .map((argument) => JSON.stringify(argument))
+      .join(" ");
     stdout.emit("data", `Running command: ${completeCommand}\n`);
 
-    const child = spawn(command, options, { shell: true });
+    // Pass arguments directly to avoid shell parsing paths containing spaces or
+    // other shell-special characters.
+    const child = spawn(command, options, { shell: false });
     child.stdout.on("data", (data) => {
       stdout.emit("data", data.toString());
     });

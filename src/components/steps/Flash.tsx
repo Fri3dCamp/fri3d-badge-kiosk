@@ -2,14 +2,20 @@ import { useContext, useEffect, useRef, useState } from "react";
 import { Button } from "../Button";
 import { StepContext } from "../../context/StepContext";
 import { Translate } from "../Translate";
+import { BoardContext } from "../../context/BoardContext";
+
+const WCH_DEVICE_NOT_FOUND = "No WCH ISP USB device found";
 
 export function Flash() {
   const [logs, setLogs] = useState("");
   const { nextStep, previousStep, backToHome } = useContext(StepContext);
+  const { selectedBoard } = useContext(BoardContext);
   const [flashing, setFlashing] = useState(true);
   const [showFlashAgain, setShowFlashAgain] = useState(false);
+  const [wchDeviceNotFound, setWchDeviceNotFound] = useState(false);
 
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
+  const stderrRef = useRef("");
 
   useEffect(() => {
     const removeHandleFlashCompleteListener =
@@ -31,6 +37,13 @@ export function Flash() {
     );
     const removeHandleStderrListener = window.electronAPI.handleStderr(
       (_, data: string) => {
+        stderrRef.current += data;
+        if (
+          selectedBoard?.chipType === "WCHISP" &&
+          stderrRef.current.includes(WCH_DEVICE_NOT_FOUND)
+        ) {
+          setWchDeviceNotFound(true);
+        }
         setLogs((logs) => logs + data);
         scrollToBottom();
       }
@@ -47,8 +60,10 @@ export function Flash() {
   }, []);
 
   function startFlash() {
+    stderrRef.current = "";
     setLogs("Ready!\n");
     setShowFlashAgain(false);
+    setWchDeviceNotFound(false);
     setFlashing(true);
     console.log("Start flashing");
     window.electronAPI.flash();
@@ -67,6 +82,14 @@ export function Flash() {
       {showFlashAgain && (
         <p className="text-center">
           <Translate item="flashingFailedButton" />
+        </p>
+      )}
+      {showFlashAgain && wchDeviceNotFound && (
+        <p
+          role="alert"
+          className="mx-auto max-w-3xl rounded-xl border-2 border-yellow-300 bg-yellow-950 px-5 py-4 text-center text-yellow-100"
+        >
+          <Translate item="wchDeviceNotFoundHint" />
         </p>
       )}
       {flashing && (

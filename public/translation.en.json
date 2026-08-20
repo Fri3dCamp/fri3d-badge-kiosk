@@ -7,6 +7,7 @@
   "flashingFailedButton": "The flashing process seems to have failed. Do you want to try again? Be sure to follow the instructions!",
   "flashingTryAgainButton": "Try again",
   "flashingBackButton": "Show instructions again",
+  "wchDeviceNotFoundHint": "We couldn't find the addon. Disconnect it from the main badge, plug the USB cable directly into the addon, and try again.",
   "chooseOtherBoard": "Choose another board",
   "flash": "Start flashing",
   "changeToLanguage": "Verander naar het Nederlands",
